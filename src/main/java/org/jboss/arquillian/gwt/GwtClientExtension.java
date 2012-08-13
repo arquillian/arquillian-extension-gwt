@@ -6,6 +6,6 @@ public class GwtClientExtension implements LoadableExtension {
 
     @Override
     public void register(ExtensionBuilder builder) {
-        builder.observer(GwtClientEnvironment.class);
+        builder.observer(GwtTestExecutor.class);
     }
 }

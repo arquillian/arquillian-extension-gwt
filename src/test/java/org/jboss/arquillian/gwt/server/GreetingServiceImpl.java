@@ -1,7 +1,7 @@
-package org.jboss.arquillian.gwt.example.server;
+package org.jboss.arquillian.gwt.server;
 
-import org.jboss.arquillian.gwt.example.client.GreetingService;
-import org.jboss.arquillian.gwt.example.shared.FieldVerifier;
+import org.jboss.arquillian.gwt.client.GreetingService;
+import org.jboss.arquillian.gwt.client.shared.FieldVerifier;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -12,6 +12,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class GreetingServiceImpl extends RemoteServiceServlet implements
     GreetingService {
 
+  @Override
   public String greetServer(String input) throws IllegalArgumentException {
     // Verify that the input is valid. 
     if (!FieldVerifier.isValidName(input)) {

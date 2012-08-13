@@ -1,4 +1,4 @@
-package org.jboss.arquillian.gwt.example.client;
+package org.jboss.arquillian.gwt.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 

@@ -1,30 +1,32 @@
-package org.jboss.arquillian.gwt.example.test;
+package org.jboss.arquillian.gwt.client.test;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.gwt.RunAsGwtClient;
-import org.jboss.arquillian.gwt.example.client.GreetingService;
-import org.jboss.arquillian.gwt.example.client.GreetingServiceAsync;
-import org.jboss.arquillian.gwt.example.shared.FieldVerifier;
+import org.jboss.arquillian.gwt.client.GreetingService;
+import org.jboss.arquillian.gwt.client.GreetingServiceAsync;
+import org.jboss.arquillian.gwt.client.shared.FieldVerifier;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-
 import com.thoughtworks.selenium.DefaultSelenium;
 
 @RunWith(Arquillian.class)
 @RunAsGwtClient(moduleName = "org.jboss.arquillian.gwt.example.sampleJUnit")
+@Ignore
 public class GWTUnitTest {
 
     @Deployment(testable = false)
     public static WebArchive sample() {
-        return Deployments.sample();
+        return ShrinkWrap.create(WebArchive.class).addClass(GreetingService.class);
     }
 
     @Drone
@@ -62,11 +64,13 @@ public class GWTUnitTest {
 
         // Send a request to the server.
         greetingService.greetServer("GWT User", new AsyncCallback<String>() {
+            @Override
             public void onFailure(Throwable caught) {
                 // The request resulted in an unexpected error.
                 Assert.fail("Request failure: " + caught.getMessage());
             }
 
+            @Override
             public void onSuccess(String result) {
                 // Verify that the response is correct.
                 Assert.assertTrue("Response starts with Hello, GWT User!", result.startsWith("Hello, GWT User!"));

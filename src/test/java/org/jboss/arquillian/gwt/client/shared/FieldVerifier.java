@@ -1,4 +1,4 @@
-package org.jboss.arquillian.gwt.example.shared;
+package org.jboss.arquillian.gwt.client.shared;
 
 /**
  * <p>

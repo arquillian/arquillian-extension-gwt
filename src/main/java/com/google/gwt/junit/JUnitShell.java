@@ -19,8 +19,6 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -35,6 +33,9 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+import org.jboss.arquillian.gwt.ArquillianJunitMessageQueue;
+import org.jboss.arquillian.gwt.ArquillianJunitMessageQueue.ClientStatus;
+import org.jboss.arquillian.gwt.ArquillianServletContainerLauncher;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 
@@ -76,7 +77,6 @@ import com.google.gwt.dev.util.arg.ArgHandlerMaxPermsPerPrecompile;
 import com.google.gwt.dev.util.arg.ArgHandlerScriptStyle;
 import com.google.gwt.dev.util.arg.ArgHandlerWarDir;
 import com.google.gwt.dev.util.arg.ArgHandlerWorkDirOptional;
-import com.google.gwt.junit.JUnitMessageQueue.ClientStatus;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.client.TimeoutException;
 import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
@@ -108,8 +108,8 @@ import com.google.gwt.util.tools.ArgHandlerString;
  * </p>
  * 
  * <p>
- * The server consists of {@link com.google.gwt.junit.server.JUnitHostImpl}, an RPC servlet which communicates back to
- * the test environment through a {@link JUnitMessageQueue}, thus closing the loop.
+ * The server consists of {@link org.jboss.arquillian.gwt.ArquillianJunitHostImpl}, an RPC servlet which communicates
+ * back to the test environment through a {@link ArquillianJunitMessageQueue}, thus closing the loop.
  * </p>
  */
 public class JUnitShell extends DevMode {
@@ -162,7 +162,7 @@ public class JUnitShell extends DevMode {
        * ----- Options from DevMode -------
        */
       // Hard code the server.
-      options.setServletContainerLauncher(shell.new MyJettyLauncher());
+      options.setServletContainerLauncher(new ArquillianServletContainerLauncher());
       // DISABLE: ArgHandlerStartupURLs
       registerHandler(new com.google.gwt.dev.ArgHandlerOutDirDeprecated(options));
       registerHandler(new ArgHandlerWarDir(options) {
@@ -597,12 +597,12 @@ public class JUnitShell extends DevMode {
   private static JUnitShell unitTestShell;
 
   /**
-   * Called by {@link com.google.gwt.junit.server.JUnitHostImpl} to get an interface into the test process.
+   * Called by {@link org.jboss.arquillian.gwt.ArquillianJunitHostImpl} to get an interface into the test process.
    * 
-   * @return The {@link JUnitMessageQueue} interface that belongs to the singleton {@link JUnitShell}, or
+   * @return The {@link ArquillianJunitMessageQueue} interface that belongs to the singleton {@link JUnitShell}, or
    *         <code>null</code> if no such singleton exists.
    */
-  public static JUnitMessageQueue getMessageQueue() {
+  public static ArquillianJunitMessageQueue getMessageQueue() {
     if (unitTestShell == null) {
       return null;
     }
@@ -705,12 +705,13 @@ public class JUnitShell extends DevMode {
       // override it from the runsStyle in getModuleUrl, but we set it to match
       // what will actually be used anyway to avoid confusion.
       unitTestShell.options.setBindAddress("0.0.0.0");
-      try {
-        unitTestShell.options.setConnectAddress(InetAddress.getLocalHost().getHostAddress());
-      }
-      catch (UnknownHostException e) {
-        throw new JUnitFatalLaunchException("Unable to resolve my address", e);
-      }
+      // try {
+      // unitTestShell.options.setConnectAddress(InetAddress.getLocalHost().getHostAddress());
+      unitTestShell.options.setConnectAddress("localhost");
+      /* }
+       catch (UnknownHostException e) {
+         throw new JUnitFatalLaunchException("Unable to resolve my address", e);
+       }*/
       if (!unitTestShell.startUp()) {
         throw new JUnitFatalLaunchException("Shell failed to start");
       }
@@ -734,7 +735,7 @@ public class JUnitShell extends DevMode {
     if (foundType != null) {
       return null;
     }
-    
+
     Map<String, CompilationUnit> unitMap = compilationState.getCompilationUnitMap();
     CompilationUnit unit = unitMap.get(typeName);
     String errMsg;
@@ -843,8 +844,8 @@ public class JUnitShell extends DevMode {
   /**
    * We need to keep a hard reference to the last module that was launched until all client browsers have successfully
    * transitioned to the current module. Failure to do so allows the last module to be GC'd, which transitively kills
-   * the {@link com.google.gwt.junit.server.JUnitHostImpl} servlet. If the servlet dies, the client browsers will be
-   * unable to transition.
+   * the {@link org.jboss.arquillian.gwt.ArquillianJunitHostImpl} servlet. If the servlet dies, the client browsers will
+   * be unable to transition.
    */
   @SuppressWarnings("unused")
   private ModuleDef lastModule;
@@ -857,7 +858,7 @@ public class JUnitShell extends DevMode {
   /**
    * Portal to interact with the servlet.
    */
-  private JUnitMessageQueue messageQueue;
+  private ArquillianJunitMessageQueue messageQueue;
 
   /**
    * An exception that should by fired the next time runTestImpl runs.
@@ -931,6 +932,10 @@ public class JUnitShell extends DevMode {
     return CheckForUpdates.ONE_MINUTE;
   }
 
+  public RunStyle getRunStyle() {
+    return runStyle;
+  }
+
   @Override
   protected boolean doStartup() {
     if (!super.doStartup()) {
@@ -941,7 +946,7 @@ public class JUnitShell extends DevMode {
       // RunStyle already logged reasons for its failure
       return false;
     }
-    messageQueue = new JUnitMessageQueue(numClients);
+    messageQueue = new ArquillianJunitMessageQueue(numClients);
 
     if (tries >= 1) {
       runStyle.setTries(tries);
@@ -1104,7 +1109,7 @@ public class JUnitShell extends DevMode {
   }
 
   String getModuleUrl(String hostName, int port, String moduleName, int codeServerPort) {
-    String url = "http://" + hostName + ":" + port + "/" + moduleName
+    String url = "http://" + "localhost" + ":" + port + "/" + moduleName
         + (standardsMode ? "/junit-standards.html" : "/junit.html");
     if (developmentMode) {
       url += "?gwt.codesvr=" + hostName + ":" + codeServerPort;
@@ -1118,19 +1123,19 @@ public class JUnitShell extends DevMode {
     for (String path : module.getServletPaths()) {
       String servletClass = module.findServletForPath(path);
       path = '/' + module.getName() + path;
-      if (!servletClass.equals(loadedServletsByPath.get(path))) {
-        try {
-          Class<?> clazz = wac.loadClass(servletClass);
-          wac.addServlet(clazz, path);
-          loadedServletsByPath.put(path, servletClass);
-        }
-        catch (ClassNotFoundException e) {
-          getTopLogger().log(
-              TreeLogger.WARN,
-              "Failed to load servlet class '" + servletClass
-                  + "' declared in '" + module.getName() + "'", e);
-        }
-      }
+      /*      if (!servletClass.equals(loadedServletsByPath.get(path))) {
+              try {
+                Class<?> clazz = wac.loadClass(servletClass);
+                wac.addServlet(clazz, path);
+                loadedServletsByPath.put(path, servletClass);
+              }
+              catch (ClassNotFoundException e) {
+                getTopLogger().log(
+                    TreeLogger.WARN,
+                    "Failed to load servlet class '" + servletClass
+                        + "' declared in '" + module.getName() + "'", e);
+              }
+            }*/
     }
     if (developmentMode) {
       // BACKWARDS COMPATIBILITY: many linkers currently fail in dev mode.
@@ -1337,7 +1342,7 @@ public class JUnitShell extends DevMode {
    */
   private void runTestImpl(GWTTestCase testCase, Class<?> testClass, TestResult testResult,
       int numTries) throws UnableToCompleteException {
-    
+
     if (testClass == null) {
       testClass = testCase.getClass();
     }
@@ -1385,7 +1390,7 @@ public class JUnitShell extends DevMode {
         return (testClassName.equals(typeName));
       }
     });
-    
+
     currentTestInfo = new TestInfo(currentModule.getName(),
         testClass.getName(), testCase.getName());
     numTries++;
@@ -1394,12 +1399,11 @@ public class JUnitShell extends DevMode {
       processTestResult(testCase, testResult, strategy);
       return;
     }
+    messageQueue = new ArquillianJunitMessageQueue();    
     compileStrategy.maybeAddTestBlockForCurrentTest(testCase, testClass, batchingStrategy);
 
     try {
-      if (firstLaunch) {
         runStyle.launchModule(currentModule.getName());
-      }
     }
     catch (UnableToCompleteException e) {
       lastLaunchFailed = true;
@@ -1416,6 +1420,7 @@ public class JUnitShell extends DevMode {
       testBeginTimeout = testBeginTime + baseTestBeginTimeoutMillis;
       testMethodTimeout = 0; // wait until test execution begins
       while (notDone()) {
+        messageQueue = ArquillianJunitMessageQueue.readFromFile();
         messageQueue.waitForResults(1000);
       }
       if (!mustRetry && pendingException != null) {
@@ -1475,5 +1480,9 @@ public class JUnitShell extends DevMode {
     }
 
     return argList.toArray(new String[argList.size()]);
+  }
+  
+  public ModuleDef getModuleDef() {
+    return currentModule;
   }
 }

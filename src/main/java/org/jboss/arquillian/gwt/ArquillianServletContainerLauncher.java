@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.arquillian.gwt.client;
+package org.jboss.arquillian.gwt;
 
-import com.google.gwt.junit.client.GWTTestCase;
+import java.io.File;
+import java.net.BindException;
 
-public class ArquillianGwtTestCase extends GWTTestCase {
+import com.google.gwt.core.ext.ServletContainer;
+import com.google.gwt.core.ext.ServletContainerLauncher;
+import com.google.gwt.core.ext.TreeLogger;
 
-  public ArquillianGwtTestCase() {}
-  
+public class ArquillianServletContainerLauncher extends ServletContainerLauncher {
+
   @Override
-  public String getModuleName() {
-    return "";
+  public ServletContainer start(TreeLogger logger, int port, File appRootDir) throws BindException, Exception {
+    return new ArquillianServletContainer();
   }
 
 }

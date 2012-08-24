@@ -12,4 +12,5 @@ import java.lang.annotation.Target;
 public @interface RunAsGwtClient {
 
     public String moduleName();
+    public int timeout() default 0;
 }

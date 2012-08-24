@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.arquillian.gwt.ArquillianJunitMessageQueue;
+
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.cfg.ConfigurationProperty;
@@ -64,23 +66,6 @@ public abstract class CompileStrategy {
     if (batchingStrategy.isSingleTestOnly()) {
       TestInfo testInfo = new TestInfo(testCase.getSyntheticModuleName(),
           testClass.getName(), testCase.getName());
-      List<TestInfo[]> testBlocks = new ArrayList<TestInfo[]>(1);
-      testBlocks.add(new TestInfo[]{testInfo});
-      getMessageQueue().addTestBlocks(testBlocks, false);
-    }
-  }
-  
-  /**
-   * Maybe add a test block for the currently executed test case.
-   *
-   * @param testCase the test case being run
-   * @param batchingStrategy the batching strategy
-   */
-  public void maybeAddTestBlockForCurrentTest(GWTTestCase testCase,
-      BatchingStrategy batchingStrategy) {
-    if (batchingStrategy.isSingleTestOnly()) {
-      TestInfo testInfo = new TestInfo(testCase.getSyntheticModuleName(),
-          testCase.getClass().getName(), testCase.getName());
       List<TestInfo[]> testBlocks = new ArrayList<TestInfo[]>(1);
       testBlocks.add(new TestInfo[]{testInfo});
       getMessageQueue().addTestBlocks(testBlocks, false);
@@ -139,6 +124,7 @@ public abstract class CompileStrategy {
         boolean isFinalModule = compiledModuleNames.size() >= getModuleCount();
         List<TestInfo[]> testBlocks = batchingStrategy.getTestBlocks(syntheticModuleName);
         getMessageQueue().addTestBlocks(testBlocks, isFinalModule);
+        getMessageQueue().writeToFile();
       }
     }
 
@@ -148,9 +134,9 @@ public abstract class CompileStrategy {
   /**
    * Visible for testing and mocking.
    *
-   * @return the {@link JUnitMessageQueue}
+   * @return the {@link ArquillianJunitMessageQueue}
    */
-  JUnitMessageQueue getMessageQueue() {
+  ArquillianJunitMessageQueue getMessageQueue() {
     return JUnitShell.getMessageQueue();
   }
 

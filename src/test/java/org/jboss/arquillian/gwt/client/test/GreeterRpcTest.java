@@ -16,27 +16,27 @@
 
 package org.jboss.arquillian.gwt.client.test;
 
-import static org.junit.Assert.assertEquals;
-
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.gwt.GwtArchive;
 import org.jboss.arquillian.gwt.RunAsGwtClient;
+import org.jboss.arquillian.gwt.client.ArquillianGwtTestCase;
 import org.jboss.arquillian.gwt.client.GreetingService;
+import org.jboss.arquillian.gwt.client.GreetingServiceAsync;
 import org.jboss.arquillian.gwt.client.shared.Greeter;
 import org.jboss.arquillian.gwt.server.GreetingServiceImpl;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 @RunWith(Arquillian.class)
-public class GreeterTest {
+public class GreeterRpcTest extends ArquillianGwtTestCase {
 
   @Inject
   Greeter greeter;
@@ -56,17 +56,20 @@ public class GreeterTest {
 
   @Test
   @RunAsGwtClient(moduleName = "org.jboss.arquillian.gwt.TestModule")
-  public void testCopyTextBoxValues() {
-    final TextBox textBox1 = new TextBox();
-    final TextBox textBox2 = new TextBox();
-    textBox1.addValueChangeHandler(new ValueChangeHandler<String>() {
+  public void testGreetingService() {
+    GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+    greetingService.greetServer("Hello!", new AsyncCallback<String>() {
       @Override
-      public void onValueChange(ValueChangeEvent<String> newValueEvent) {
-        textBox2.setText(newValueEvent.getValue());
+      public void onFailure(Throwable caught) {
+        Assert.fail("Request failure: " + caught.getMessage());
+      }
+
+      @Override
+      public void onSuccess(String result) {
+        assertEquals("Received invalid response from Server", "Welcome!", result);
+        finishTest();
       }
     });
-    textBox1.setValue("value", true);
-    assertEquals("TextBox values do not match!", textBox1.getText(), textBox2.getText());
+    delayTestFinish(5000);
   }
-  
 }

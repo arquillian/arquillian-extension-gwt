@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.arquillian.gwt.client;
+package org.jboss.arquillian.gwt;
 
-import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.core.ext.ServletContainer;
+import com.google.gwt.core.ext.UnableToCompleteException;
 
-public class ArquillianGwtTestCase extends GWTTestCase {
+public class ArquillianServletContainer extends ServletContainer {
 
-  public ArquillianGwtTestCase() {}
-  
   @Override
-  public String getModuleName() {
-    return "";
+  public int getPort() {
+    return 8080;
+  }
+
+  @Override
+  public void refresh() throws UnableToCompleteException {
+    
+  }
+
+  @Override
+  public void stop() throws UnableToCompleteException {
+    
   }
 
 }

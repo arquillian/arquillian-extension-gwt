@@ -21,10 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.arquillian.gwt.client.ArquillianGwtTestCase;
+
 import com.google.gwt.core.ext.BadPropertyValueException;
 import com.google.gwt.core.ext.ConfigurationProperty;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.GeneratorContextExtWrapper;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -33,15 +36,18 @@ import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.junit.client.impl.JUnitHost;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.rpc.ServiceInterfaceProxyGenerator;
 
 /**
- * This class generates a stub class for classes that derive from GWTTestCase.
- * This stub class provides the necessary bridge between our Hosted or Hybrid
- * mode classes and the JUnit system.
+ * This class generates a stub class for classes that derive from GWTTestCase. This stub class provides the necessary
+ * bridge between our Hosted or Hybrid mode classes and the JUnit system.
  */
 public class JUnitTestCaseStubGenerator extends Generator {
+
+  public static final String MANIFEST_ARTIFACT_DIR = "rpcPolicyManifest/manifests";
 
   /**
    * An interface for filtering out methods.
@@ -53,13 +59,12 @@ public class JUnitTestCaseStubGenerator extends Generator {
   /**
    * Like JClassType.getMethod(String name) except:
    * 
-   * <li>it accepts a filter</li>
-   * <li>it searches the inheritance hierarchy (includes superclasses)</li>
+   * <li>it accepts a filter</li> <li>it searches the inheritance hierarchy (includes superclasses)</li>
    * 
-   * For methods which are overridden, only the most derived implementations are
-   * included.
+   * For methods which are overridden, only the most derived implementations are included.
    * 
-   * @param type the type to search (non-null)
+   * @param type
+   *          the type to search (non-null)
    * @return the set of matching methods (non-null)
    */
   protected static Map<String, List<JMethod>> getAllMethods(JClassType type,
@@ -106,10 +111,9 @@ public class JUnitTestCaseStubGenerator extends Generator {
   }
 
   /**
-   * Returns true if the method is considered to be a valid JUnit test method.
-   * The criteria are that the method's name begin with "test" and have public
-   * access. The method may be static. You must choose to include or exclude
-   * methods which have arguments.
+   * Returns true if the method is considered to be a valid JUnit test method. The criteria are that the method's name
+   * begin with "test" and have public access. The method may be static. You must choose to include or exclude methods
+   * which have arguments.
    */
   protected static boolean isJUnitTestMethod(JMethod method, boolean acceptArgs) {
     if (!method.getName().startsWith("test")) {
@@ -124,11 +128,12 @@ public class JUnitTestCaseStubGenerator extends Generator {
   }
 
   /**
-   * Returns true IFF the two sets of parameters are of the same lengths and
-   * types.
+   * Returns true IFF the two sets of parameters are of the same lengths and types.
    * 
-   * @param params1 must not be null
-   * @param params2 must not be null
+   * @param params1
+   *          must not be null
+   * @param params2
+   *          must not be null
    */
   private static boolean equals(JParameter[] params1, JParameter[] params2) {
     if (params1.length != params2.length) {
@@ -143,8 +148,7 @@ public class JUnitTestCaseStubGenerator extends Generator {
   }
 
   /**
-   * Returns the method names for the set of methods that are strictly JUnit
-   * test methods (have no arguments).
+   * Returns the method names for the set of methods that are strictly JUnit test methods (have no arguments).
    * 
    * @param requestedClass
    */
@@ -179,6 +183,8 @@ public class JUnitTestCaseStubGenerator extends Generator {
     writeSource(context);
     sourceWriter.commit(logger);
 
+    new ServiceInterfaceProxyGenerator().generateIncrementally(logger, GeneratorContextExtWrapper.newInstance(context),
+        JUnitHost.class.getName());
     return qualifiedStubClassName;
   }
 
@@ -202,7 +208,8 @@ public class JUnitTestCaseStubGenerator extends Generator {
       ConfigurationProperty prop = context.getPropertyOracle().getConfigurationProperty(
           "junit.moduleName");
       moduleName = prop.getValues().get(0);
-    } catch (BadPropertyValueException e) {
+    }
+    catch (BadPropertyValueException e) {
       logger.log(TreeLogger.ERROR,
           "Could not resolve junit.moduleName property", e);
       throw new UnableToCompleteException();
@@ -242,7 +249,8 @@ public class JUnitTestCaseStubGenerator extends Generator {
 
     try {
       requestedClass = typeOracle.getType(typeName);
-    } catch (NotFoundException e) {
+    }
+    catch (NotFoundException e) {
       logger.log(
           TreeLogger.ERROR,
           "Could not find type '"
@@ -258,8 +266,14 @@ public class JUnitTestCaseStubGenerator extends Generator {
     packageName = requestedClass.getPackage().getName();
     qualifiedStubClassName = packageName + "." + simpleStubClassName;
 
+    if (requestedClass.getSuperclass().getName().equals(ArquillianGwtTestCase.class.getSimpleName())) {
+      sourceWriter = getSourceWriter(logger, context, packageName,
+          simpleStubClassName, requestedClass.getQualifiedSourceName());
+    }
+    else {
     sourceWriter = getSourceWriter(logger, context, packageName,
         simpleStubClassName, GWTTestCase.class.getName());
+    }
 
     return sourceWriter != null;
   }
@@ -268,24 +282,40 @@ public class JUnitTestCaseStubGenerator extends Generator {
     sw.println();
     sw.println("protected final void doRunTest(String name) throws Throwable {");
     sw.indent();
-    sw.indentln(requestedClass.getName() + " actualTest = new " + requestedClass.getName() + "();");
-    for (int i = 0, n = testMethodNames.length; i < n; ++i) {
-      String methodName = testMethodNames[i];
+    
+    if (requestedClass.getSuperclass().getName().equals("ArquillianGwtTestCase")) {
+      for (int i = 0, n = testMethodNames.length; i < n; ++i) {
+        String methodName = testMethodNames[i];
 
-      if (i > 0) {
-        sw.print("else ");
+        if (i > 0) {
+          sw.print("else ");
+        }
+
+        sw.println("if (name.equals(\"" + methodName + "\")) {");
+        sw.indentln(methodName + "();");
+        sw.println("}");
       }
-
-      sw.println("if (name.equals(\"" + methodName + "\")) {");
-      sw.indentln("actualTest." + methodName + "();");
+      sw.outdent();
       sw.println("}");
     }
-    sw.outdent();
-    sw.println("}"); // finish doRunTest();
+    else {
+      sw.indentln(requestedClass.getName() + " actualTest = new " + requestedClass.getName() + "();");
+      for (int i = 0, n = testMethodNames.length; i < n; ++i) {
+        String methodName = testMethodNames[i];
+  
+        if (i > 0) {
+          sw.print("else ");
+        }
+  
+        sw.println("if (name.equals(\"" + methodName + "\")) {");
+        sw.indentln("actualTest." + methodName + "();");
+        sw.println("}");
+      }
+      sw.outdent();
+      sw.println("}"); 
+    }
     sw.println("public String getModuleName() {");
     sw.indentln("return \"" + moduleName + "\";");
     sw.println("}");
-    
   }
-
 }

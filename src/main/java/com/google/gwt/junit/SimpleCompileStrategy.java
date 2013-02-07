@@ -23,6 +23,7 @@ import com.google.gwt.junit.JUnitShell.Strategy;
 /**
  * Strategy that compiles only one module at a time. Optimizes memory usage.
  */
+// TODO modified for the Arquillian GWT extension to make accessible
 public class SimpleCompileStrategy extends CompileStrategy {
   public SimpleCompileStrategy(JUnitShell junitShell) {
     super(junitShell);

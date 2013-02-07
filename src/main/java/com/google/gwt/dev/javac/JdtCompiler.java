@@ -19,17 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -39,18 +29,7 @@ import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
 import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Annotation;
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.ast.Block;
-import org.eclipse.jdt.internal.compiler.ast.Clinit;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Expression;
-import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Initializer;
-import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
@@ -58,17 +37,7 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
-import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.NestedTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.gwt.RunAsGwtClient;
@@ -89,25 +58,27 @@ import com.google.gwt.util.tools.Utility;
  */
 public class JdtCompiler {
   /**
-   * Provides hooks for changing the behavior of the JdtCompiler when unknown types are encountered during compilation.
-   * Currently used for allowing external tools to provide source lazily when undefined references appear.
+   * Provides hooks for changing the behavior of the JdtCompiler when unknown
+   * types are encountered during compilation. Currently used for allowing
+   * external tools to provide source lazily when undefined references appear.
    */
   public static interface AdditionalTypeProviderDelegate {
     /**
-     * Checks for additional packages which may contain additional compilation units.
+     * Checks for additional packages which may contain additional compilation
+     * units.
      * 
-     * @param slashedPackageName
-     *          the '/' separated name of the package to find
+     * @param slashedPackageName the '/' separated name of the package to find
      * @return <code>true</code> if such a package exists
      */
     boolean doFindAdditionalPackage(String slashedPackageName);
 
     /**
-     * Finds a new compilation unit on-the-fly for the requested type, if there is an alternate mechanism for doing so.
+     * Finds a new compilation unit on-the-fly for the requested type, if there
+     * is an alternate mechanism for doing so.
      * 
-     * @param binaryName
-     *          the binary name of the requested type
-     * @return a unit answering the name, or <code>null</code> if no such unit can be created
+     * @param binaryName the binary name of the requested type
+     * @return a unit answering the name, or <code>null</code> if no such unit
+     *         can be created
      */
     GeneratedUnit doFindAdditionalType(String binaryName);
   }
@@ -118,7 +89,8 @@ public class JdtCompiler {
   public static final class DefaultUnitProcessor implements UnitProcessor {
     private final List<CompilationUnit> results = new ArrayList<CompilationUnit>();
 
-    public DefaultUnitProcessor() {}
+    public DefaultUnitProcessor() {
+    }
 
     public List<CompilationUnit> getResults() {
       return Lists.normalizeUnmodifiable(results);
@@ -127,7 +99,6 @@ public class JdtCompiler {
     @Override
     public void process(CompilationUnitBuilder builder, CompilationUnitDeclaration cud,
         List<CompiledClass> compiledClasses) {
-
       builder.setClasses(compiledClasses).setTypes(Collections.<JDeclaredType> emptyList())
           .setDependencies(new Dependencies()).setJsniMethods(Collections.<JsniMethod> emptyList())
           .setMethodArgs(new MethodArgNamesLookup())
@@ -135,7 +106,6 @@ public class JdtCompiler {
       results.add(builder.build());
     }
   }
-
   /**
    * Static cache of all the JRE package names.
    */
@@ -174,8 +144,7 @@ public class JdtCompiler {
           }
         }
         return pkgs;
-      }
-      catch (IOException e) {
+      } catch (IOException e) {
         throw new InternalCompilerException("Unable to find JRE", e);
       }
     }
@@ -253,7 +222,8 @@ public class JdtCompiler {
       ICompilationUnit icu = cud.compilationResult().compilationUnit;
       Adapter adapter = (Adapter) icu;
       CompilationUnitBuilder builder = adapter.getBuilder();
-
+      
+      // TODO this code was added for the arquillian gwt extension
       for (TypeDeclaration type : cud.types) {
         if (type.methods != null) {
           if (isAnnotationPresent(RunWith.class.getSimpleName(), type.annotations)) {
@@ -279,10 +249,11 @@ public class JdtCompiler {
           }
         }
       }
-
+      
       processor.process(builder, cud, compiledClasses);
     }
 
+    // TODO this code was added for the arquillian gwt extension
     private boolean isAnnotationPresent(String annotationName, Annotation[] annotations) {
       if (annotations != null) {
         for (Annotation annotation : annotations) {
@@ -293,7 +264,7 @@ public class JdtCompiler {
       }
       return false;
     }
-
+    
     /**
      * Recursively creates enclosing types first.
      */
@@ -322,7 +293,8 @@ public class JdtCompiler {
    */
   private static class ICompilerRequestorImpl implements ICompilerRequestor {
     @Override
-    public void acceptResult(CompilationResult result) {}
+    public void acceptResult(CompilationResult result) {
+    }
   }
 
   /**
@@ -330,7 +302,8 @@ public class JdtCompiler {
    */
   private class INameEnvironmentImpl implements INameEnvironment {
     @Override
-    public void cleanup() {}
+    public void cleanup() {
+    }
 
     @Override
     public NameEnvironmentAnswer findType(char[] type, char[][] pkg) {
@@ -346,8 +319,7 @@ public class JdtCompiler {
         if (compiledClass != null) {
           return compiledClass.getNameEnvironmentAnswer();
         }
-      }
-      catch (ClassFormatException ex) {
+      } catch (ClassFormatException ex) {
         // fall back to binary class
       }
       if (isPackage(binaryName)) {
@@ -368,15 +340,12 @@ public class JdtCompiler {
           try {
             ClassFileReader cfr = ClassFileReader.read(openStream, resource.toExternalForm(), true);
             return new NameEnvironmentAnswer(cfr, null);
-          }
-          finally {
+          } finally {
             Utility.close(openStream);
           }
         }
-      }
-      catch (ClassFormatException e) {
-      }
-      catch (IOException e) {
+      } catch (ClassFormatException e) {
+      } catch (IOException e) {
       }
       return null;
     }
@@ -424,8 +393,7 @@ public class JdtCompiler {
       if (getClassLoader().getResource(resourceName) != null) {
         addPackages(slashedPackageName);
         return true;
-      }
-      else {
+      } else {
         notPackages.add(slashedPackageName);
         return false;
       }
@@ -433,7 +401,8 @@ public class JdtCompiler {
   }
 
   /**
-   * Compiles the given set of units. The units will be internally modified to reflect the results of compilation.
+   * Compiles the given set of units. The units will be internally modified to
+   * reflect the results of compilation.
    */
   public static List<CompilationUnit> compile(Collection<CompilationUnitBuilder> builders) {
     Event jdtCompilerEvent = SpeedTracerLogger.start(CompilerEventType.JDT_COMPILER);
@@ -443,8 +412,7 @@ public class JdtCompiler {
       JdtCompiler compiler = new JdtCompiler(processor);
       compiler.doCompile(builders);
       return processor.getResults();
-    }
-    finally {
+    } finally {
       jdtCompilerEvent.end();
     }
   }
@@ -478,8 +446,10 @@ public class JdtCompiler {
       // resolve an outer type before trying to get the cached inner
       String cupName = typeName.substring(0, p);
       char[][] chars = CharOperation.splitOn('.', cupName.toCharArray());
-      if (lookupEnvironment.getType(chars) != null) {
+      ReferenceBinding outerType = lookupEnvironment.getType(chars);
+      if (outerType != null) {
         // outer class was found
+        resolveRecursive(outerType);
         chars = CharOperation.splitOn('.', typeName.toCharArray());
         type = lookupEnvironment.getCachedType(chars);
         if (type == null) {
@@ -487,8 +457,7 @@ public class JdtCompiler {
           return null;
         }
       }
-    }
-    else {
+    } else {
       // just resolve the type straight out
       char[][] chars = CharOperation.splitOn('.', typeName.toCharArray());
       type = lookupEnvironment.getType(chars);
@@ -496,7 +465,12 @@ public class JdtCompiler {
 
     if (type != null) {
       if (type instanceof UnresolvedReferenceBinding) {
-        type = BinaryTypeBinding.resolveType(type, lookupEnvironment, true);
+        /*
+         * Since type is an instance of UnresolvedReferenceBinding, we know that
+         * the return value BinaryTypeBinding.resolveType will be of type
+         * ReferenceBinding
+         */
+        type = (ReferenceBinding) BinaryTypeBinding.resolveType(type, lookupEnvironment, true);
       }
       // found it
       return type;
@@ -514,7 +488,8 @@ public class JdtCompiler {
   }
 
   /**
-   * Returns <code>true</code> if this is a local type, or if this type is nested inside of any local type.
+   * Returns <code>true</code> if this is a local type, or if this type is
+   * nested inside of any local type.
    */
   private static boolean isLocalType(ClassFile classFile) {
     SourceTypeBinding b = classFile.referenceBinding;
@@ -525,6 +500,16 @@ public class JdtCompiler {
       b = ((NestedTypeBinding) b).enclosingType;
     }
     return false;
+  }
+
+  /**
+   * Recursively invoking {@link ReferenceBinding#memberTypes()} causes JDT to
+   * resolve and cache all nested types at arbitrary depth.
+   */
+  private static void resolveRecursive(ReferenceBinding outerType) {
+    for (ReferenceBinding memberType : outerType.memberTypes()) {
+      resolveRecursive(memberType);
+    }
   }
 
   private AdditionalTypeProviderDelegate additionalTypeProviderDelegate;
@@ -722,8 +707,7 @@ public class JdtCompiler {
             FieldDeclaration field;
             if ((field = type.fields[i]).isStatic()) {
               field.traverse(this, type.staticInitializerScope);
-            }
-            else {
+            } else {
               field.traverse(this, type.initializerScope);
             }
           }
@@ -778,8 +762,7 @@ public class JdtCompiler {
       int pos = slashedPackageName.lastIndexOf('/');
       if (pos > 0) {
         slashedPackageName = slashedPackageName.substring(0, pos);
-      }
-      else {
+      } else {
         packages.add("");
         break;
       }

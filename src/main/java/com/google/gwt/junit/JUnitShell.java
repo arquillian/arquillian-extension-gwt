@@ -60,23 +60,7 @@ import com.google.gwt.dev.javac.CompilationUnit;
 import com.google.gwt.dev.javac.StandardGeneratorContext;
 import com.google.gwt.dev.shell.CheckForUpdates;
 import com.google.gwt.dev.shell.jetty.JettyLauncher;
-import com.google.gwt.dev.util.arg.ArgHandlerDeployDir;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableAggressiveOptimization;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableCastChecking;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableClassMetadata;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableRunAsync;
-import com.google.gwt.dev.util.arg.ArgHandlerDisableUpdateCheck;
-import com.google.gwt.dev.util.arg.ArgHandlerDraftCompile;
-import com.google.gwt.dev.util.arg.ArgHandlerEnableAssertions;
-import com.google.gwt.dev.util.arg.ArgHandlerEnableGeneratorResultCaching;
-import com.google.gwt.dev.util.arg.ArgHandlerExtraDir;
-import com.google.gwt.dev.util.arg.ArgHandlerGenDir;
-import com.google.gwt.dev.util.arg.ArgHandlerLocalWorkers;
-import com.google.gwt.dev.util.arg.ArgHandlerLogLevel;
-import com.google.gwt.dev.util.arg.ArgHandlerMaxPermsPerPrecompile;
-import com.google.gwt.dev.util.arg.ArgHandlerScriptStyle;
-import com.google.gwt.dev.util.arg.ArgHandlerWarDir;
-import com.google.gwt.dev.util.arg.ArgHandlerWorkDirOptional;
+import com.google.gwt.dev.util.arg.*;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.client.TimeoutException;
 import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
@@ -191,7 +175,6 @@ public class JUnitShell extends DevMode {
       registerHandler(new ArgHandlerDisableRunAsync(options));
       registerHandler(new ArgHandlerDisableUpdateCheck(options));
       registerHandler(new ArgHandlerDraftCompile(options));
-      registerHandler(new ArgHandlerEnableGeneratorResultCaching(options));
       registerHandler(new ArgHandlerMaxPermsPerPrecompile(options));
       registerHandler(new ArgHandlerLocalWorkers(options));
 
@@ -596,6 +579,7 @@ public class JUnitShell extends DevMode {
    */
   private static JUnitShell unitTestShell;
 
+  // TODO this code was added for the arquillian gwt extension
   /**
    * Called by {@link org.jboss.arquillian.gwt.ArquillianJunitHostImpl} to get an interface into the test process.
    * 

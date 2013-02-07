@@ -27,7 +27,6 @@ import com.google.gwt.core.ext.BadPropertyValueException;
 import com.google.gwt.core.ext.ConfigurationProperty;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.GeneratorContextExtWrapper;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -36,18 +35,14 @@ import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.junit.client.GWTTestCase;
-import com.google.gwt.junit.client.impl.JUnitHost;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.rpc.ServiceInterfaceProxyGenerator;
 
 /**
  * This class generates a stub class for classes that derive from GWTTestCase. This stub class provides the necessary
  * bridge between our Hosted or Hybrid mode classes and the JUnit system.
  */
 public class JUnitTestCaseStubGenerator extends Generator {
-
-  public static final String MANIFEST_ARTIFACT_DIR = "rpcPolicyManifest/manifests";
 
   /**
    * An interface for filtering out methods.
@@ -183,8 +178,6 @@ public class JUnitTestCaseStubGenerator extends Generator {
     writeSource(context);
     sourceWriter.commit(logger);
 
-    new ServiceInterfaceProxyGenerator().generateIncrementally(logger, GeneratorContextExtWrapper.newInstance(context),
-        JUnitHost.class.getName());
     return qualifiedStubClassName;
   }
 
@@ -203,18 +196,7 @@ public class JUnitTestCaseStubGenerator extends Generator {
   @SuppressWarnings("unused")
   protected void writeSource(GeneratorContext context) throws UnableToCompleteException {
     String[] testMethods = getTestMethodNames(requestedClass);
-    String moduleName;
-    try {
-      ConfigurationProperty prop = context.getPropertyOracle().getConfigurationProperty(
-          "junit.moduleName");
-      moduleName = prop.getValues().get(0);
-    }
-    catch (BadPropertyValueException e) {
-      logger.log(TreeLogger.ERROR,
-          "Could not resolve junit.moduleName property", e);
-      throw new UnableToCompleteException();
-    }
-    writeDoRunTestMethod(testMethods, moduleName, sourceWriter);
+    writeDoRunTestMethod(testMethods, sourceWriter, getModuleName(context));
   }
 
   /**
@@ -235,7 +217,6 @@ public class JUnitTestCaseStubGenerator extends Generator {
     ClassSourceFileComposerFactory composerFactory = new ClassSourceFileComposerFactory(
         packageName, className);
 
-    composerFactory.addImport(superclassName);
     composerFactory.setSuperclass(superclassName);
 
     return composerFactory.createSourceWriter(ctx, printWriter);
@@ -271,18 +252,19 @@ public class JUnitTestCaseStubGenerator extends Generator {
           simpleStubClassName, requestedClass.getQualifiedSourceName());
     }
     else {
-    sourceWriter = getSourceWriter(logger, context, packageName,
-        simpleStubClassName, GWTTestCase.class.getName());
+      sourceWriter = getSourceWriter(logger, context, packageName,
+          simpleStubClassName, GWTTestCase.class.getName());
     }
 
     return sourceWriter != null;
   }
 
-  private void writeDoRunTestMethod(String[] testMethodNames, String moduleName, SourceWriter sw) {
+  private void writeDoRunTestMethod(String[] testMethodNames, SourceWriter sw, String moduleName) {
     sw.println();
     sw.println("protected final void doRunTest(String name) throws Throwable {");
     sw.indent();
-    
+
+    // TODO this was added for the arquillian gwt extension
     if (requestedClass.getSuperclass().getName().equals("ArquillianGwtTestCase")) {
       for (int i = 0, n = testMethodNames.length; i < n; ++i) {
         String methodName = testMethodNames[i];
@@ -312,10 +294,30 @@ public class JUnitTestCaseStubGenerator extends Generator {
         sw.println("}");
       }
       sw.outdent();
-      sw.println("}"); 
+      sw.println("}"); // finish doRunTest();
     }
+
+    // TODO this was added for the arquillian gwt extension, so that test classes do not have to inherit from
+    // GWTTestCase
     sw.println("public String getModuleName() {");
     sw.indentln("return \"" + moduleName + "\";");
     sw.println("}");
   }
+
+  private String getModuleName(GeneratorContext context) throws UnableToCompleteException {
+    String moduleName;
+    try {
+      ConfigurationProperty prop = context.getPropertyOracle().getConfigurationProperty(
+          "junit.moduleName");
+      moduleName = prop.getValues().get(0);
+    }
+    catch (BadPropertyValueException e) {
+      logger.log(TreeLogger.ERROR,
+          "Could not resolve junit.moduleName property", e);
+      throw new UnableToCompleteException();
+    }
+
+    return moduleName;
+  }
+
 }

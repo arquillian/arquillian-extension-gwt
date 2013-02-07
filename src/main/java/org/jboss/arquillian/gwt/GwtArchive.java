@@ -18,7 +18,6 @@ package org.jboss.arquillian.gwt;
 
 import java.io.File;
 
-import org.jboss.arquillian.gwt.client.ArquillianGwtAsyncResult;
 import org.jboss.arquillian.gwt.client.ArquillianGwtTestCase;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -53,13 +52,12 @@ public class GwtArchive {
         WebArchive archive = ShrinkWrap.create(WebArchive.class, module + ".war")
             .addClass(ArquillianJunitHostImpl.class)
             .addClass(ArquillianJunitMessageQueue.class)
-            .addClass(ArquillianGwtAsyncResult.class)
             .addClass(ArquillianGwtTestCase.class)
             .addAsLibraries(
                 DependencyResolvers.use(MavenDependencyResolver.class)
-                    .artifact("com.google.gwt:gwt-user:2.4.0")
-                    .artifact("com.google.gwt:gwt-dev:2.4.0")
-                    .artifact("com.google.gwt:gwt-servlet:2.4.0")
+                    .artifact("com.google.gwt:gwt-user:2.5.0")
+                    .artifact("com.google.gwt:gwt-dev:2.5.0")
+                    .artifact("com.google.gwt:gwt-servlet:2.5.0")
                     .resolveAsFiles())
             .addAsWebInfResource(new File("src/main/webapp/WEB-INF/web.xml"))
             .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
@@ -68,7 +66,6 @@ public class GwtArchive {
           archive.addAsWebResource(aFile, aFile.getName());
         }
 
-        // System.out.println(archive.toString(true));
         return archive;
       }
     }

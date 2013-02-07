@@ -25,6 +25,7 @@ import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
  *
  * Strategy that does not batch tests.
  */
+// TODO modified for the Arquillian GWT extension to make accessible
 public class NoBatchingStrategy extends BatchingStrategy {
   @Override
   public List<TestInfo[]> getTestBlocks(String syntheticModuleName) {

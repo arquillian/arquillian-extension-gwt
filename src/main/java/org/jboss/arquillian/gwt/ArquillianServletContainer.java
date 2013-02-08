@@ -23,7 +23,8 @@ public class ArquillianServletContainer extends ServletContainer {
 
   @Override
   public int getPort() {
-    return 8080;
+    // default port, actual port will be set by GwtTestExecutor
+    return 80;
   }
 
   @Override

@@ -6,6 +6,10 @@ import java.util.Set;
 
 import junit.framework.TestFailure;
 
+import org.jboss.arquillian.container.spi.client.protocol.ProtocolDescription;
+import org.jboss.arquillian.container.spi.client.protocol.metadata.HTTPContext;
+import org.jboss.arquillian.container.spi.client.protocol.metadata.ProtocolMetaData;
+import org.jboss.arquillian.container.spi.event.container.AfterDeploy;
 import org.jboss.arquillian.container.test.impl.client.deployment.event.GenerateDeployment;
 import org.jboss.arquillian.container.test.impl.execution.event.ExecutionEvent;
 import org.jboss.arquillian.container.test.impl.execution.event.LocalExecutionEvent;
@@ -35,7 +39,7 @@ public class GwtTestExecutor {
   @Inject
   @TestScoped
   private InstanceProducer<TestResult> testResult;
-
+  
   public void onGenerateDeployment(@Observes EventContext<GenerateDeployment> context) throws UnableToCompleteException {
     // find all modules
     Set<String> modules = new HashSet<String>();
@@ -64,6 +68,12 @@ public class GwtTestExecutor {
 
   }
 
+  public void onAfterDeploy(@Observes AfterDeploy event, ProtocolMetaData pmd) {
+    ProtocolDescription pd = event.getDeployableContainer().getDefaultProtocol();
+    HTTPContext context = pmd.getContext(HTTPContext.class);
+    JUnitShell.getUnitTestShell()._setPort(context.getPort());
+  }
+  
   public void onRemoteTestExecution(@Observes final EventContext<RemoteExecutionEvent> eventContext) {
     maybeRunGwtTest(eventContext);
   }

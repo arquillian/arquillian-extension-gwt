@@ -30,6 +30,7 @@ import com.google.gwt.junit.client.GWTTestCase.BaseStrategy;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+// TODO leverage Arquillian Archive SPI rather than creating our own Archive wrapper.
 public class GwtArchive {
 
   private static final String WAR_DIR = "war";

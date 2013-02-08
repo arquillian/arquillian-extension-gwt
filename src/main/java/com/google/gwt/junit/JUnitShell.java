@@ -1469,4 +1469,8 @@ public class JUnitShell extends DevMode {
   public ModuleDef getModuleDef() {
     return currentModule;
   }
+  
+  public void _setPort(int port) {
+    options.setPort(port);
+  }
 }

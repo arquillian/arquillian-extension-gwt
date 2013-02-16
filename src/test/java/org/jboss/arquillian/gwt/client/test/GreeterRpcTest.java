@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,25 @@ public class GreeterRpcTest extends ArquillianGwtTestCase {
   @Test
   @RunAsGwtClient(moduleName = "org.jboss.arquillian.gwt.TestModule")
   public void testGreetingService() {
+    GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+    greetingService.greetServer("Hello!", new AsyncCallback<String>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        Assert.fail("Request failure: " + caught.getMessage());
+      }
+
+      @Override
+      public void onSuccess(String result) {
+        assertEquals("Received invalid response from Server", "Welcome!", result);
+        finishTest();
+      }
+    });
+    delayTestFinish(5000);
+  }
+  
+  @Test
+  @RunAsGwtClient(moduleName = "org.jboss.arquillian.gwt.TestModule")
+  public void testGreetingService2() {
     GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
     greetingService.greetServer("Hello!", new AsyncCallback<String>() {
       @Override

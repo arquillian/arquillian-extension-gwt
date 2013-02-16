@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,29 @@ import java.net.BindException;
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 
+/**
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class ArquillianServletContainerLauncher extends ServletContainerLauncher {
 
   @Override
   public ServletContainer start(TreeLogger logger, int port, File appRootDir) throws BindException, Exception {
-    return new ArquillianServletContainer();
-  }
+    return new ServletContainer() {
+      @Override
+      public int getPort() {
+        // default port, actual port will be set by GwtTestExecutor
+        return 80;
+      }
 
+      @Override
+      public void refresh() throws UnableToCompleteException {
+      }
+
+      @Override
+      public void stop() throws UnableToCompleteException {
+      }
+    };
+  }
 }

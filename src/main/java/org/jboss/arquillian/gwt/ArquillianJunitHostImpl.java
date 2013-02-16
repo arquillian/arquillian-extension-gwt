@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,6 +47,7 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
  * An RPC servlet that serves as a proxy to JUnitTestShell. Enables communication between the unit test code running in
  * a browser and the real test process.
  */
+@WebServlet(urlPatterns = "/junithost", loadOnStartup = 1)
 public class ArquillianJunitHostImpl extends HybridServiceServlet implements JUnitHost {
 
   private static class StrongName extends StringKey {

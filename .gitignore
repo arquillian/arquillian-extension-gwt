@@ -1,7 +1,24 @@
-target
-.settings
+# Eclipse
 .project
 .classpath
+.settings/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea
+
+# Maven
+target/
+
+# TestNG
+test-output/
+
+# JBoss AS
+transaction.log
+
+# GWT
 war
 gwt-unitCache
 sample.war

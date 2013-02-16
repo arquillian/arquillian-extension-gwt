@@ -58,27 +58,25 @@ import com.google.gwt.util.tools.Utility;
  */
 public class JdtCompiler {
   /**
-   * Provides hooks for changing the behavior of the JdtCompiler when unknown
-   * types are encountered during compilation. Currently used for allowing
-   * external tools to provide source lazily when undefined references appear.
+   * Provides hooks for changing the behavior of the JdtCompiler when unknown types are encountered during compilation.
+   * Currently used for allowing external tools to provide source lazily when undefined references appear.
    */
   public static interface AdditionalTypeProviderDelegate {
     /**
-     * Checks for additional packages which may contain additional compilation
-     * units.
+     * Checks for additional packages which may contain additional compilation units.
      * 
-     * @param slashedPackageName the '/' separated name of the package to find
+     * @param slashedPackageName
+     *          the '/' separated name of the package to find
      * @return <code>true</code> if such a package exists
      */
     boolean doFindAdditionalPackage(String slashedPackageName);
 
     /**
-     * Finds a new compilation unit on-the-fly for the requested type, if there
-     * is an alternate mechanism for doing so.
+     * Finds a new compilation unit on-the-fly for the requested type, if there is an alternate mechanism for doing so.
      * 
-     * @param binaryName the binary name of the requested type
-     * @return a unit answering the name, or <code>null</code> if no such unit
-     *         can be created
+     * @param binaryName
+     *          the binary name of the requested type
+     * @return a unit answering the name, or <code>null</code> if no such unit can be created
      */
     GeneratedUnit doFindAdditionalType(String binaryName);
   }
@@ -89,8 +87,7 @@ public class JdtCompiler {
   public static final class DefaultUnitProcessor implements UnitProcessor {
     private final List<CompilationUnit> results = new ArrayList<CompilationUnit>();
 
-    public DefaultUnitProcessor() {
-    }
+    public DefaultUnitProcessor() {}
 
     public List<CompilationUnit> getResults() {
       return Lists.normalizeUnmodifiable(results);
@@ -106,6 +103,7 @@ public class JdtCompiler {
       results.add(builder.build());
     }
   }
+
   /**
    * Static cache of all the JRE package names.
    */
@@ -144,7 +142,8 @@ public class JdtCompiler {
           }
         }
         return pkgs;
-      } catch (IOException e) {
+      }
+      catch (IOException e) {
         throw new InternalCompilerException("Unable to find JRE", e);
       }
     }
@@ -222,34 +221,36 @@ public class JdtCompiler {
       ICompilationUnit icu = cud.compilationResult().compilationUnit;
       Adapter adapter = (Adapter) icu;
       CompilationUnitBuilder builder = adapter.getBuilder();
-      
+
       // TODO this code was added for the arquillian gwt extension
-      for (TypeDeclaration type : cud.types) {
-        if (type.methods != null) {
-          if (isAnnotationPresent(RunWith.class.getSimpleName(), type.annotations)) {
-            Set<AbstractMethodDeclaration> filteredMethods = new HashSet<AbstractMethodDeclaration>();
-            boolean match = false;
-            for (AbstractMethodDeclaration decl : type.methods) {
-              if (decl.annotations != null) {
-                // TODO make this configurable
-                if ((isAnnotationPresent(RunAsGwtClient.class.getSimpleName(), decl.annotations)
-                    || isAnnotationPresent(RunAsGwtClient.class.getSimpleName(), type.annotations))
-                    && !isAnnotationPresent(Deployment.class.getSimpleName(), decl.annotations)) {
-                  filteredMethods.add(decl);
-                }
-                else {
-                  match = true;
-                  System.out.println("Ignoring non-translatable method:\n" + decl.toString());
+      if (cud.types != null) {
+        for (TypeDeclaration type : cud.types) {
+          if (type.methods != null) {
+            if (isAnnotationPresent(RunWith.class.getSimpleName(), type.annotations)) {
+              Set<AbstractMethodDeclaration> filteredMethods = new HashSet<AbstractMethodDeclaration>();
+              boolean match = false;
+              for (AbstractMethodDeclaration decl : type.methods) {
+                if (decl.annotations != null) {
+                  // TODO make this configurable
+                  if ((isAnnotationPresent(RunAsGwtClient.class.getSimpleName(), decl.annotations)
+                      || isAnnotationPresent(RunAsGwtClient.class.getSimpleName(), type.annotations))
+                      && !isAnnotationPresent(Deployment.class.getSimpleName(), decl.annotations)) {
+                    filteredMethods.add(decl);
+                  }
+                  else {
+                    match = true;
+                    System.out.println("Ignoring non-translatable method:\n" + decl.toString());
+                  }
                 }
               }
-            }
-            if (match) {
-              type.methods = filteredMethods.toArray(new AbstractMethodDeclaration[filteredMethods.size()]);
+              if (match) {
+                type.methods = filteredMethods.toArray(new AbstractMethodDeclaration[filteredMethods.size()]);
+              }
             }
           }
         }
       }
-      
+
       processor.process(builder, cud, compiledClasses);
     }
 
@@ -264,7 +265,7 @@ public class JdtCompiler {
       }
       return false;
     }
-    
+
     /**
      * Recursively creates enclosing types first.
      */
@@ -293,8 +294,7 @@ public class JdtCompiler {
    */
   private static class ICompilerRequestorImpl implements ICompilerRequestor {
     @Override
-    public void acceptResult(CompilationResult result) {
-    }
+    public void acceptResult(CompilationResult result) {}
   }
 
   /**
@@ -302,8 +302,7 @@ public class JdtCompiler {
    */
   private class INameEnvironmentImpl implements INameEnvironment {
     @Override
-    public void cleanup() {
-    }
+    public void cleanup() {}
 
     @Override
     public NameEnvironmentAnswer findType(char[] type, char[][] pkg) {
@@ -319,7 +318,8 @@ public class JdtCompiler {
         if (compiledClass != null) {
           return compiledClass.getNameEnvironmentAnswer();
         }
-      } catch (ClassFormatException ex) {
+      }
+      catch (ClassFormatException ex) {
         // fall back to binary class
       }
       if (isPackage(binaryName)) {
@@ -340,12 +340,15 @@ public class JdtCompiler {
           try {
             ClassFileReader cfr = ClassFileReader.read(openStream, resource.toExternalForm(), true);
             return new NameEnvironmentAnswer(cfr, null);
-          } finally {
+          }
+          finally {
             Utility.close(openStream);
           }
         }
-      } catch (ClassFormatException e) {
-      } catch (IOException e) {
+      }
+      catch (ClassFormatException e) {
+      }
+      catch (IOException e) {
       }
       return null;
     }
@@ -393,7 +396,8 @@ public class JdtCompiler {
       if (getClassLoader().getResource(resourceName) != null) {
         addPackages(slashedPackageName);
         return true;
-      } else {
+      }
+      else {
         notPackages.add(slashedPackageName);
         return false;
       }
@@ -401,8 +405,7 @@ public class JdtCompiler {
   }
 
   /**
-   * Compiles the given set of units. The units will be internally modified to
-   * reflect the results of compilation.
+   * Compiles the given set of units. The units will be internally modified to reflect the results of compilation.
    */
   public static List<CompilationUnit> compile(Collection<CompilationUnitBuilder> builders) {
     Event jdtCompilerEvent = SpeedTracerLogger.start(CompilerEventType.JDT_COMPILER);
@@ -412,7 +415,8 @@ public class JdtCompiler {
       JdtCompiler compiler = new JdtCompiler(processor);
       compiler.doCompile(builders);
       return processor.getResults();
-    } finally {
+    }
+    finally {
       jdtCompilerEvent.end();
     }
   }
@@ -457,7 +461,8 @@ public class JdtCompiler {
           return null;
         }
       }
-    } else {
+    }
+    else {
       // just resolve the type straight out
       char[][] chars = CharOperation.splitOn('.', typeName.toCharArray());
       type = lookupEnvironment.getType(chars);
@@ -488,8 +493,7 @@ public class JdtCompiler {
   }
 
   /**
-   * Returns <code>true</code> if this is a local type, or if this type is
-   * nested inside of any local type.
+   * Returns <code>true</code> if this is a local type, or if this type is nested inside of any local type.
    */
   private static boolean isLocalType(ClassFile classFile) {
     SourceTypeBinding b = classFile.referenceBinding;
@@ -503,8 +507,8 @@ public class JdtCompiler {
   }
 
   /**
-   * Recursively invoking {@link ReferenceBinding#memberTypes()} causes JDT to
-   * resolve and cache all nested types at arbitrary depth.
+   * Recursively invoking {@link ReferenceBinding#memberTypes()} causes JDT to resolve and cache all nested types at
+   * arbitrary depth.
    */
   private static void resolveRecursive(ReferenceBinding outerType) {
     for (ReferenceBinding memberType : outerType.memberTypes()) {
@@ -707,7 +711,8 @@ public class JdtCompiler {
             FieldDeclaration field;
             if ((field = type.fields[i]).isStatic()) {
               field.traverse(this, type.staticInitializerScope);
-            } else {
+            }
+            else {
               field.traverse(this, type.initializerScope);
             }
           }
@@ -762,7 +767,8 @@ public class JdtCompiler {
       int pos = slashedPackageName.lastIndexOf('/');
       if (pos > 0) {
         slashedPackageName = slashedPackageName.substring(0, pos);
-      } else {
+      }
+      else {
         packages.add("");
         break;
       }

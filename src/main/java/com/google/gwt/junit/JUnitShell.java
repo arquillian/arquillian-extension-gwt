@@ -145,6 +145,7 @@ public class JUnitShell extends DevMode {
       /*
        * ----- Options from DevMode -------
        */
+      // TODO Modified for the Arquillian GWT extension. Avoid starting Jetty. 
       // Hard code the server.
       options.setServletContainerLauncher(new ArquillianServletContainerLauncher());
       // DISABLE: ArgHandlerStartupURLs

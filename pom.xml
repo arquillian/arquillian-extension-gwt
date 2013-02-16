@@ -5,13 +5,12 @@
 
   <groupId>org.jboss.arquillian.extension</groupId>
   <artifactId>arquillian-gwt-extension</artifactId>
-  <version>1.0.0-alpha-1-SNAPSHOT</version>
+  <version>1.0.0.Alpha1</version>
   <packaging>jar</packaging>
   <name>Arquillian GWT Testing extension</name>
 
   <properties>
     <version.arquillian_core>1.0.2.Final</version.arquillian_core>
-    <version.arquillian_drone>1.0.0.CR3</version.arquillian_drone>
     <version.jbossas_7>7.0.1.Final</version.jbossas_7>
     <version.junit>4.8.2</version.junit>
     <version.gwt>2.5.0</version.gwt>
@@ -23,13 +22,6 @@
         <groupId>org.jboss.arquillian</groupId>
         <artifactId>arquillian-bom</artifactId>
         <version>${version.arquillian_core}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.arquillian.extension</groupId>
-        <artifactId>arquillian-drone-bom</artifactId>
-        <version>${version.arquillian_drone}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -75,6 +67,7 @@
       <artifactId>weld-core</artifactId>
       <version>1.1.5.Final</version>
     </dependency>
+    
     <!-- Arquillian dependencies -->
     <dependency>
       <groupId>org.jboss.arquillian.core</groupId>
@@ -97,48 +90,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${version.junit}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.arquillian.extension</groupId>
-      <artifactId>arquillian-drone-impl</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Support for Selenium in Arquillian Drone -->
-    <dependency>
-      <groupId>org.jboss.arquillian.extension</groupId>
-      <artifactId>arquillian-drone-selenium</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Support for Selenium Server in Arquillian Drone -->
-    <dependency>
-      <groupId>org.jboss.arquillian.extension</groupId>
-      <artifactId>arquillian-drone-selenium-server</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Selenium -->
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-java</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Selenium Server -->
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-server</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Selenium Server dependency, feel free to use different slf4j implementation -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.6.4</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -173,17 +124,20 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.4.0</version>
+        <version>2.5.0</version>
         <executions>
           <execution>
             <goals>
+              <goal>resources</goal>
               <goal>compile</goal>
             </goals>
-            <configuration>
-              <!-- This arg is needed for compilation to finish properly. 
-                If it's not set, maven runs out of memory because of exhaustive report generating -->
-              <soyc>false</soyc>
-            </configuration>
+          </execution>
+          <execution>
+            <id>clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -258,4 +212,3 @@
     </profile>
   </profiles>
 </project>
-

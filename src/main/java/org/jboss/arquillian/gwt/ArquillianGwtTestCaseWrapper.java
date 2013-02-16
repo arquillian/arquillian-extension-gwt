@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import com.google.gwt.junit.PropertyDefiningStrategy;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.client.impl.JUnitHost.TestInfo;
 
+/**
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class ArquillianGwtTestCaseWrapper extends GWTTestCase {
 
   private String moduleName;

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jboss.arquillian.extension</groupId>
-  <artifactId>arquillian-gwt-extension</artifactId>
+  <artifactId>arquillian-gwt</artifactId>
   <version>1.0.0.Alpha1</version>
   <packaging>jar</packaging>
   <name>Arquillian GWT Testing extension</name>

@@ -19,6 +19,8 @@ To start using the Arquillian GWT extension just add the following dependency to
         <version>1.0.0.Alpha1</version>
     </dependency>
 
+Make sure this dependency is specified before all GWT dependencies (gwt-user, gwt-dev, gwt-servlet) in your pom.xml. 
+The Arquillian GWT extension requires GWT 2.5.0 or higher.
 
 Writing Arquillian GWT tests
 ------------------

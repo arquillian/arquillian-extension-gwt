@@ -72,23 +72,5 @@ public class GreeterRpcTest extends ArquillianGwtTestCase {
     });
     delayTestFinish(5000);
   }
-  
-  @Test
-  @RunAsGwtClient(moduleName = "org.jboss.arquillian.gwt.TestModule")
-  public void testGreetingService2() {
-    GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
-    greetingService.greetServer("Hello!", new AsyncCallback<String>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        Assert.fail("Request failure: " + caught.getMessage());
-      }
 
-      @Override
-      public void onSuccess(String result) {
-        assertEquals("Received invalid response from Server", "Welcome!", result);
-        finishTest();
-      }
-    });
-    delayTestFinish(5000);
-  }
 }

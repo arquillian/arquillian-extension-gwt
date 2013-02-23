@@ -9,9 +9,7 @@
     <!-- universal configuration for both JBoss AS 6 and JBoss AS 7 -->
     <container qualifier="jboss" default="true">
         <configuration>
-            <property name="jbossHome">${jbossHome}</property>
-            <property name="bindAddress">127.0.0.1</property>
-            <property name="httpPort">8080</property>
+            <property name="jbossHome">${jbossHome:jboss-as-7.1.1.Final}</property>
         </configuration>
     </container>
 </arquillian>

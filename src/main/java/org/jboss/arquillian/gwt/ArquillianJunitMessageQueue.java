@@ -18,6 +18,7 @@ package org.jboss.arquillian.gwt;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -512,16 +513,27 @@ public class ArquillianJunitMessageQueue implements Serializable {
   }
 
   public void writeToFile() {
+    ObjectOutputStream out = null;
     try {
       String tempDir = System.getProperty("java.io.tmpdir");
       File tmpFile = new File(tempDir + File.separator + "gwt-unit-test.queue");
       tmpFile.delete();
-      ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(tmpFile));
+      out = new ObjectOutputStream(new FileOutputStream(tmpFile));
       out.writeObject(this);
-      out.close();
+      out.flush();
     }
     catch (Exception e) {
       throw new RuntimeException(e);
+    }
+    finally {
+      if (out != null) {
+        try {
+          out.close();
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }      
+      }
     }
   }
 

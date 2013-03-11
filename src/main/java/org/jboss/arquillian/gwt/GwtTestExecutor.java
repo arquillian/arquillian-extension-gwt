@@ -87,7 +87,9 @@ public class GwtTestExecutor {
   public void onAfterDeploy(@Observes AfterDeploy event, ProtocolMetaData pmd) {
     ProtocolDescription pd = event.getDeployableContainer().getDefaultProtocol();
     HTTPContext context = pmd.getContext(HTTPContext.class);
+    
     JUnitShell.getUnitTestShell()._setPort(context.getPort());
+    JUnitShell.getUnitTestShell().setContextPath(event.getDeployment().getArchive().getName().replaceAll(".war", ""));
   }
   
   public void onRemoteTestExecution(@Observes final EventContext<RemoteExecutionEvent> eventContext) {

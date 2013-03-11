@@ -857,7 +857,6 @@ public class TypeOracleMediator extends TypeOracleBuilder {
       CollectAnnotationData deployment = new CollectAnnotationData(Deployment.class.getCanonicalName(), true);
       if (!resolveMethod(logger, type, method, typeParamLookup, context)  && !method.getAnnotations().contains(deployment)) {
         logger.log(TreeLogger.DEBUG, "Unable to resolve method " + method);
-        return false;
       }
     }
 

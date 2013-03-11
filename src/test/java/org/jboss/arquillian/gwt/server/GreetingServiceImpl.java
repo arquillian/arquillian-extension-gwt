@@ -13,6 +13,6 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String greetServer(String input) throws IllegalArgumentException {
-    return "Welcome!";
+    return "Howdy!";
   }
 }

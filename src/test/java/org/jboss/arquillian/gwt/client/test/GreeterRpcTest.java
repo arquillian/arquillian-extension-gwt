@@ -16,10 +16,11 @@
 
 package org.jboss.arquillian.gwt.client.test;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.gwt.GwtArchive;
 import org.jboss.arquillian.gwt.RunAsGwtClient;
 import org.jboss.arquillian.gwt.client.ArquillianGwtTestCase;
 import org.jboss.arquillian.gwt.client.GreetingService;
@@ -27,6 +28,8 @@ import org.jboss.arquillian.gwt.client.GreetingServiceAsync;
 import org.jboss.arquillian.gwt.client.shared.Greeter;
 import org.jboss.arquillian.gwt.server.GreetingServiceImpl;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,10 +46,12 @@ public class GreeterRpcTest extends ArquillianGwtTestCase {
 
   @Deployment
   public static WebArchive createDeployment() {
-    return GwtArchive.get()
+    return ShrinkWrap.create(WebArchive.class, "test.war")
       .addClass(Greeter.class)
       .addClass(GreetingService.class)
-      .addClass(GreetingServiceImpl.class);
+      .addClass(GreetingServiceImpl.class)
+      .addAsWebInfResource(new File("src/main/webapp/WEB-INF/web.xml"))
+      .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
   }
 
   @Test
@@ -58,7 +63,7 @@ public class GreeterRpcTest extends ArquillianGwtTestCase {
   @RunAsGwtClient(moduleName = "org.jboss.arquillian.gwt.TestModule")
   public void testGreetingService() {
     GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
-    greetingService.greetServer("Hello!", new AsyncCallback<String>() {
+    greetingService.greetServer("Hello, Earthling!", new AsyncCallback<String>() {
       @Override
       public void onFailure(Throwable caught) {
         Assert.fail("Request failure: " + caught.getMessage());
@@ -66,7 +71,7 @@ public class GreeterRpcTest extends ArquillianGwtTestCase {
 
       @Override
       public void onSuccess(String result) {
-        assertEquals("Received invalid response from Server", "Welcome!", result);
+        assertEquals("Received invalid response from Server", "Howdy!", result);
         finishTest();
       }
     });

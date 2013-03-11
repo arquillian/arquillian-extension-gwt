@@ -16,12 +16,16 @@
 
 package org.jboss.arquillian.gwt;
 
+import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
 import org.jboss.arquillian.core.spi.LoadableExtension;
 
+/**
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class GwtClientExtension implements LoadableExtension {
-
-    @Override
-    public void register(ExtensionBuilder builder) {
-        builder.observer(GwtTestExecutor.class);
-    }
+  @Override
+  public void register(ExtensionBuilder builder) {
+    builder.observer(GwtTestExecutor.class);
+    builder.service(ApplicationArchiveProcessor.class, GwtApplicationArchiveProcessor.class);
+  }
 }

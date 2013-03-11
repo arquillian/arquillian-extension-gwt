@@ -1094,10 +1094,10 @@ public class JUnitShell extends DevMode {
   }
 
   String getModuleUrl(String hostName, int port, String moduleName, int codeServerPort) {
-    String url = "http://" + "localhost" + ":" + port + "/" + moduleName
-        + (standardsMode ? "/junit-standards.html" : "/junit.html");
+    String url = "http://" + "localhost" + ":" + port + "/" + contextPath
+        + (standardsMode ? "/arquillian-gwt-devmode.html" : "/arquillian-gwt.html") + "?module=" + moduleName;
     if (developmentMode) {
-      url += "?gwt.codesvr=" + hostName + ":" + codeServerPort;
+      url += "&gwt.codesvr=" + hostName + ":" + codeServerPort;
     }
     return url;
   }
@@ -1473,5 +1473,11 @@ public class JUnitShell extends DevMode {
   
   public void _setPort(int port) {
     options.setPort(port);
+  }
+  
+  private String contextPath;
+  
+  public void setContextPath(String contextPath) {
+    this.contextPath = contextPath;  
   }
 }

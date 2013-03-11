@@ -21,12 +21,13 @@ import static org.junit.Assert.assertEquals;
 import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.gwt.GwtArchive;
 import org.jboss.arquillian.gwt.RunAsGwtClient;
 import org.jboss.arquillian.gwt.client.GreetingService;
 import org.jboss.arquillian.gwt.client.shared.Greeter;
 import org.jboss.arquillian.gwt.server.GreetingServiceImpl;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,15 +44,17 @@ public class GreeterTest {
 
   @Deployment
   public static WebArchive createDeployment() {
-    return GwtArchive.get()
-      .addClass(Greeter.class)
-      .addClass(GreetingService.class)
-      .addClass(GreetingServiceImpl.class);
+    return ShrinkWrap.create(WebArchive.class, "test.war")
+        .addClass(Greeter.class)
+        .addClass(GreetingService.class)
+        .addClass(GreetingServiceImpl.class)
+        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
   }
 
   @Test
   public void testCreateGreeting() {
     assertEquals("Hello, Earthling!", greeter.createGreeting("Earthling"));
+    
   }
 
   @Test
@@ -65,8 +68,8 @@ public class GreeterTest {
         textBox2.setText(newValueEvent.getValue());
       }
     });
-    textBox1.setValue("value", true);
+    textBox1.setValue("Hello, Earthling!", true);
     assertEquals("TextBox values do not match!", textBox1.getText(), textBox2.getText());
   }
-  
+
 }

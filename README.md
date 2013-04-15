@@ -39,9 +39,7 @@ public class MyTestClass {
   }
 }
 ```
-To help packaging your app for the test deployment Arquillian GWT provides a simple utility called `GwtArchive`. 
-The next version of Arquillian GWT will automatically enhance the used `WebArchive`. So, you won't need to use 
-this utility in the future. Here's a complete example:
+Here's a complete example:
 
 ```java
 @RunWith(Arquillian.class)
@@ -49,10 +47,11 @@ public class GreeterRpcTest extends ArquillianGwtTestCase {
 
   @Deployment
   public static WebArchive createDeployment() {
-    return GwtArchive.get()
+    return ShrinkWrap.create(WebArchive.class, "test.war")
       .addClass(Greeter.class)
       .addClass(GreetingService.class)
-      .addClass(GreetingServiceImpl.class);
+      .addClass(GreetingServiceImpl.class)
+      .addAsWebInfResource(new File("src/main/webapp/WEB-INF/web.xml"));
   }
 
   @Test

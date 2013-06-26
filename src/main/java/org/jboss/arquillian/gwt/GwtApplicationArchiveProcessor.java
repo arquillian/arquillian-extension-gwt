@@ -69,7 +69,7 @@ public class GwtApplicationArchiveProcessor implements ApplicationArchiveProcess
           webArchive.addAsWebResource(getClass().getResource("arquillian-gwt-devmode.html"), "arquillian-gwt-devmode.html");
           webArchive.addAsWebResource(getClass().getResource("arquillian-gwt.html"), "arquillian-gwt.html");
 
-          //System.out.println("webArchive = " + webArchive.toString(true));
+          System.out.println("webArchive = " + webArchive.toString(true));
           return;
         }
       }
@@ -79,7 +79,7 @@ public class GwtApplicationArchiveProcessor implements ApplicationArchiveProcess
   }
   
   private void addFiles(File dir, WebArchive webArchive, String path) {
-    if (!path.isEmpty() && !path.endsWith(File.separator)) {
+    if (!path.isEmpty()) {
       path += File.separator;
     }
     

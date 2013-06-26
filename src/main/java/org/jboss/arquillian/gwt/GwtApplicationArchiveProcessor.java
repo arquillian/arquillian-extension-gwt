@@ -64,17 +64,32 @@ public class GwtApplicationArchiveProcessor implements ApplicationArchiveProcess
                       .artifact("com.google.gwt:gwt-servlet:2.5.0")
                       .resolveAsFiles());
 
-          for (File aFile : moduleDir.listFiles()) {
-            webArchive.addAsWebResource(aFile, aFile.getName());
-          }
+          addFiles(moduleDir, webArchive , "");
+          
           webArchive.addAsWebResource(getClass().getResource("arquillian-gwt-devmode.html"), "arquillian-gwt-devmode.html");
           webArchive.addAsWebResource(getClass().getResource("arquillian-gwt.html"), "arquillian-gwt.html");
 
+          System.out.println("webArchive = " + webArchive.toString(true));
           return;
         }
       }
-
+      
       throw new RuntimeException("No GWT module found!");
+    }
+  }
+  
+  private void addFiles(File dir, WebArchive webArchive, String path) {
+    if (!path.isEmpty() && !path.endsWith(File.separator)) {
+      path += File.separator;
+    }
+    
+    for (File f : dir.listFiles()) {
+      if (f.isDirectory()) {
+        addFiles(f, webArchive, path + f.getName());
+      } 
+      else {
+        webArchive.addAsWebResource(f, path + f.getName());
+      }
     }
   }
 }

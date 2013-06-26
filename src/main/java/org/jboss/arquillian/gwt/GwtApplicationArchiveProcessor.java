@@ -69,7 +69,7 @@ public class GwtApplicationArchiveProcessor implements ApplicationArchiveProcess
           webArchive.addAsWebResource(getClass().getResource("arquillian-gwt-devmode.html"), "arquillian-gwt-devmode.html");
           webArchive.addAsWebResource(getClass().getResource("arquillian-gwt.html"), "arquillian-gwt.html");
 
-          System.out.println("webArchive = " + webArchive.toString(true));
+          //System.out.println("webArchive = " + webArchive.toString(true));
           return;
         }
       }

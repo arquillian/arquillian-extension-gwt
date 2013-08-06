@@ -51,7 +51,7 @@ public class GwtApplicationArchiveProcessor implements ApplicationArchiveProcess
             module = moduleDir.getPath().substring(moduleDir.getPath().lastIndexOf("/") + 1);
           }
         }
-
+        
         if (!module.isEmpty()) {
           webArchive
               .addClass(ArquillianJunitHostImpl.class)
@@ -74,7 +74,10 @@ public class GwtApplicationArchiveProcessor implements ApplicationArchiveProcess
         }
       }
       
-      throw new RuntimeException("No GWT module found!");
+      // the module was empty but no gwt client run methods found
+      if(testClass.getAnnotation(RunAsGwtClient.class) != null || testClass.getMethods(RunAsGwtClient.class).length > 0) {
+        throw new RuntimeException("Instructed to run tests as GWT Client but no GWT Module found!");  
+      }      
     }
   }
   

@@ -247,25 +247,35 @@ public class JUnitTestCaseStubGenerator extends Generator {
     packageName = requestedClass.getPackage().getName();
     qualifiedStubClassName = packageName + "." + simpleStubClassName;
 
-    if (requestedClass.getSuperclass().getName().equals(ArquillianGwtTestCase.class.getSimpleName())) {
-      sourceWriter = getSourceWriter(logger, context, packageName,
+    if (isSubclassOfArquillianGwtTestCase(requestedClass)) {
+        sourceWriter = getSourceWriter(logger, context, packageName,
           simpleStubClassName, requestedClass.getQualifiedSourceName());
-    }
-    else {
-      sourceWriter = getSourceWriter(logger, context, packageName,
+    } else {
+        sourceWriter = getSourceWriter(logger, context, packageName,
           simpleStubClassName, GWTTestCase.class.getName());
     }
 
     return sourceWriter != null;
   }
 
+  private boolean isSubclassOfArquillianGwtTestCase(JClassType reqClass) {
+      JClassType superClass = reqClass.getSuperclass();
+      while (superClass != null) {
+          if (superClass.getName().equals(ArquillianGwtTestCase.class.getSimpleName())) {
+              return true;
+          }
+          superClass = superClass.getSuperclass();
+      }  
+      return false;
+  }
+  
   private void writeDoRunTestMethod(String[] testMethodNames, SourceWriter sw, String moduleName) {
     sw.println();
     sw.println("protected final void doRunTest(String name) throws Throwable {");
     sw.indent();
 
     // TODO this was added for the arquillian gwt extension
-    if (requestedClass.getSuperclass().getName().equals("ArquillianGwtTestCase")) {
+    if (isSubclassOfArquillianGwtTestCase(requestedClass)) {
       for (int i = 0, n = testMethodNames.length; i < n; ++i) {
         String methodName = testMethodNames[i];
 
